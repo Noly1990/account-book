@@ -1,7 +1,7 @@
 import { cloneElement, useState } from "react";
 
 function CheckboxGroup(props: {
-    children: JSX.Element[],
+    children?: JSX.Element[],
     value?: any
     defaultValue?: any
     onChange?: (value: any[]) => void
@@ -19,7 +19,7 @@ function CheckboxGroup(props: {
     return (
         <div>
             {
-                props.children.map(v => {
+               props.children && props.children.map(v => {
                     return cloneElement(v, {
                         key: v.props.value,
                         checked: value.indexOf(v.props.value) > -1,

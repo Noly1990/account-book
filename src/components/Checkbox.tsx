@@ -25,11 +25,10 @@ function Checkbox(props: CheckboxProps) {
             }} onChange={props.onChange ? (e) => {
                 if (props.onChange) props.onChange(props.value, !props.checked)
                 setChecked(!props.checked)
-
-            } : onChange} checked={props.checked || checked} type="checkbox" id={props.title} value="first_checkbox" />
+            } : onChange} checked={props.checked || checked} type="checkbox" id={props.title} value={props.value} />
             <label style={{
                 fontSize: size
-            }} htmlFor={props.title}>1月</label>
+            }} htmlFor={props.title}>{props.title}</label>
         </div>
     )
 }

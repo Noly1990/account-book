@@ -1,5 +1,5 @@
-import React from "react";
-import HeaderCol from "./HeaderCol";
+import React, { useEffect, useState } from "react";
+import HeaderCol, { SortType } from "./HeaderCol";
 
 
 export interface ColumnItem {
@@ -22,7 +22,7 @@ export interface ColumnItem {
     /**
      * 该项是否支持排序，默认按值大小排序，需要为number可惜
      */
-    sorter?: (a: any, b: any) => boolean,
+    sorter?: (a: any, b: any) => any,
 
     onFilter?: (values: any[], record: any) => boolean
 
@@ -48,6 +48,40 @@ function Table(props: {
 
     const { columns, dataSource } = props;
 
+    useEffect(() => {
+        setData(dataSource)
+    }, [dataSource])
+
+    const [innerData, setData] = useState(dataSource || [])
+
+    const [filters, setFilters] = useState<any>({})
+
+    function onFilter(key: string, filter: any, values: any[]) {
+
+
+
+        filters[key] = {
+            filter,
+            values
+        }
+
+        setFilters(filters)
+        let newData = dataSource;
+        for (let key in filters) {
+            newData = newData.filter((v) => filters[key].filter(filters[key].values, v))
+        }
+
+        setData(newData)
+    }
+
+    function onSort(key: string, sorter: any, sortType: SortType) {
+        const newData = sortType === 'none' ? innerData : [...innerData].sort(sorter);
+        if (sortType === 'down') {
+            newData.reverse()
+        }
+        setData(newData)
+    }
+
     return (
         <table style={{
             marginTop: 20,
@@ -55,16 +89,15 @@ function Table(props: {
         }}>
             <thead>
                 <tr style={{ display: "flex" }}>
-                    {columns.map((c: ColumnItem, i: number) => <HeaderCol allowFilter={!!c.filters} allowSort={!!c.sorter} key={`${c.key}${i}`}>{c.title}</HeaderCol>)}
+                    {columns.map((c: ColumnItem, i: number) => <HeaderCol filter={c.onFilter} handleSort={onSort} handleFilter={onFilter} dataKey={c.dataKey} filters={c.filters} sorter={c.sorter} key={`${c.key}${i}`}>{c.title}</HeaderCol>)}
                 </tr>
             </thead>
             <tbody>
                 {
-                    dataSource && dataSource.length > 0 ? dataSource.map((v: any, i: number) => {
-
+                    innerData.length > 0 ? innerData.map((v: any, i: number) => {
                         return (<tr key={'row' + i} style={{ display: "flex" }}>
                             {columns.map((c: ColumnItem, ii) => <td key={'data' + i + '-' + ii} style={{ flex: 1 }}>{
-                                c.render ? c.render(v[c.dataKey]) : v[c.dataKey].toString()
+                                c.render ? c.render(v[c.dataKey], v) : v[c.dataKey].toString()
                             }</td>)}
                         </tr>)
                     }) : <tr><td>没有数据</td></tr>

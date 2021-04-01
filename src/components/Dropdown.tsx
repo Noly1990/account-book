@@ -1,4 +1,4 @@
-import React, { cloneElement, useEffect, useState } from "react";
+import React, { cloneElement } from "react";
 
 
 /**
@@ -9,11 +9,10 @@ import React, { cloneElement, useEffect, useState } from "react";
 function Dropdown(props: {
     content: JSX.Element,
     children: any,
-    visible?: boolean;
+    handleVisible: any,
+    visible: boolean;
     disabled?: boolean
 }) {
-
-    const [visible, setVisible] = useState(props.visible || false);
 
     const child = React.Children.only(props.children) as React.ReactElement<any>;
 
@@ -21,16 +20,10 @@ function Dropdown(props: {
         disabled: props.disabled,
     });
 
-
-    useEffect(() => {
-        setVisible(props.visible || false)
-    }, [props.visible])
-
-
     function Trigger() {
         return (
             <div onClick={(e) => {
-                setVisible(!visible)
+                props.handleVisible(!props.visible)
                 e.stopPropagation()
             }} style={{ display: 'inline-block' }}>
                 {dropdownTrigger}
@@ -40,7 +33,7 @@ function Dropdown(props: {
     function Popup() {
         return (
             <div style={{
-                display: visible ? 'block' : 'none',
+                display: "block",
                 position: 'absolute',
                 width: 100,
                 right: 0,
@@ -56,7 +49,7 @@ function Dropdown(props: {
     return (
         <div style={{ display: 'inline-block', position: 'relative' }}>
             {
-                visible ? <Popup /> : null
+                props.visible && <Popup />
             }
             {<Trigger />}
         </div>
