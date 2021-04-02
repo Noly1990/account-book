@@ -58,11 +58,13 @@ function Table(props: {
 
     function onFilter(key: string, filter: any, values: any[]) {
 
-
-
         filters[key] = {
             filter,
             values
+        }
+
+        if (values.length === 0) {
+            delete filters[key]
         }
 
         setFilters(filters)
