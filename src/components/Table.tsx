@@ -84,9 +84,32 @@ function Table(props: {
         setData(newData)
     }
 
+    const [income, setIncome] = useState(0);
+
+    const [expense, setExpense] = useState(0);
+
+    const [statistics, setStat] = useState([])
+
+    function clickToStatistics() {
+        
+    }
+
+    useEffect(() => {
+        let tempIn = 0;
+        let tempOut = 0;
+
+        innerData.forEach((v: any) => {
+            tempIn += v.type === 1 ? v.amount : 0;
+
+            tempOut += v.type === 0 ? v.amount : 0;
+        })
+        setIncome(tempIn)
+        setExpense(tempOut)
+    }, [
+        innerData
+    ])
     return (
         <table style={{
-            marginTop: 20,
             width: '100%'
         }}>
             <thead>
@@ -95,6 +118,11 @@ function Table(props: {
                 </tr>
             </thead>
             <tbody>
+                <tr style={{ display: 'flex', marginTop: 10, marginBottom: 10 }}>
+                    <td style={{ flex: 1 }}>当前收入：{income}</td>
+                    <td style={{ flex: 1 }}>当前支出：{expense}</td>
+                    <td style={{ flex: 1 }}><button onClick={clickToStatistics}>分类统计</button></td>
+                </tr>
                 {
                     innerData.length > 0 ? innerData.map((v: any, i: number) => {
                         return (<tr key={'row' + i} style={{ display: "flex" }}>

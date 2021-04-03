@@ -7,7 +7,8 @@ import { fileExt, formatDate } from './tool';
 import Table from './components/Table';
 import { bills, categories } from './csv/data';
 import Modal from './components/Modal';
-import MyWebGL from './components/MyWebGL';
+import CategoryManager from './components/CategoryManager';
+import { PlusOutlined } from '@ant-design/icons';
 
 interface DataItem {
   time: Date,
@@ -30,7 +31,7 @@ function App() {
 
   const [cateFilters, setFilters] = useState<any>([])
 
-  const [category, setCate] = useState<undefined | Map<string, CategoryItem>>(undefined)
+  const [category, setCate] = useState<Map<string, CategoryItem>>(new Map())
 
   const [modalV, setModalV] = useState(false)
 
@@ -51,7 +52,6 @@ function App() {
     }, new Map())
     setCate(map)
 
-    setFilters(Array.from(map).map(v => v[1]).map(v => { return { title: v.name, value: v.id } }))
 
   }
 
@@ -92,7 +92,7 @@ function App() {
     for (let index = 1; index < data.length; index++) {
       const element = data[index];
       const temp = title.reduce((p: { [key: string]: any }, v: string, i: number) => {
-        p[v] = element[i]
+        p[v] = v === 'type' ? parseInt(element[i]) : element[i]
         return p;
       }, {})
 
@@ -166,8 +166,6 @@ function App() {
         alert('处理出错')
         return
       }
-
-      console.log(res.data)
       const map = processCategory(res.data)?.reduce((p: Map<string, CategoryItem>, v: CategoryItem) => {
         p.set(v.id, v)
         return p;
@@ -209,15 +207,16 @@ function App() {
   }
 
 
-
-
-
-
   useEffect(() => {
-    if (data.length > 0 && category) {
+    if (data.length > 0 && category.size > 0) {
       setDataSource(data)
     }
   }, [data, category])
+
+  useEffect(() => {
+    setFilters(Array.from(category).map(v => v[1]).map(v => { return { title: v.name, value: v.id } }))
+  }, [category])
+
 
   return (
     <div className="App">
@@ -232,7 +231,7 @@ function App() {
           请选择分类文件： <input onChange={onCategoryChange} type="file" onClick={(e: any) => { e.target.value = null }} placeholder="请选择分类数据" accept=".csv" />
         </div>
         <div style={{ flex: 1 }}>
-          <button onClick={autoLoad}>一键加载</button>
+          <button onClick={autoLoad}>一键加载数据</button>
 
           <button style={{ marginLeft: 6 }} onClick={() => {
             setNewItem({
@@ -244,11 +243,7 @@ function App() {
               ope: 'add'
             })
             setModalV(true)
-          }}>新增账单</button>
-
-          <button style={{ marginLeft: 6 }} onClick={() => {
-
-          }}>新增分类</button>
+          }}>新增账单 <PlusOutlined /></button>
         </div>
       </div>
       <Modal width={500} title={newItem.ope === 'add' ? "新增账单" : "修改账单"} visible={modalV}>
@@ -256,14 +251,15 @@ function App() {
           <div style={{ display: 'flex', marginTop: 20 }}>
             <div style={{ flex: 1 }} >
               <label htmlFor="type">账单类型：</label>
-              <input type="radio" id="0" name="type" value={0} onChange={(e) => {
+              <input disabled type="radio" id="0" name="type" value={0} onChange={(e) => {
                 setNewItem({
                   ...newItem,
                   type: parseInt(e.target.value)
                 })
               }} checked={newItem.type === 0} />
               <label htmlFor="0">支出</label>
-              <input type="radio" id="1" name="type" value={1} onChange={(e) => {
+              <input disabled type="radio" id="1" name="type" value={1} onChange={(e) => {
+                console.log(e.target.value)
                 setNewItem({
                   ...newItem,
                   type: parseInt(e.target.value)
@@ -276,6 +272,7 @@ function App() {
               <select value={newItem.category} onChange={(e) => {
                 setNewItem({
                   ...newItem,
+                  type: category.get(e.target.value)?.type || 0,
                   category: e.target.value
                 })
               }} id="category" name="category" placeholder="请选择账单类型">
@@ -283,7 +280,6 @@ function App() {
                 {
                   cateFilters.map((v: any) => <option key={v.value} value={v.value}>{v.title}</option>)
                 }
-
               </select>
             </div>
           </div>
@@ -320,10 +316,13 @@ function App() {
 
       <div style={{ display: 'flex' }}>
         <div style={{
+          marginTop: 10,
           marginLeft: 100,
-          marginRight: 100,
           marginBottom: 50,
-          flex: 3
+          marginRight: 30,
+          height: '80vh',
+          overflowY: 'scroll',
+          flex: 2
         }}>
           <Table dataSource={dataSource} columns={[
             {
@@ -366,7 +365,7 @@ function App() {
               key: 'category',
               title: '账单分类',
               render: (v: any) => {
-                return <span>{category?.get(v)?.name}</span>
+                return <span>{category?.get(v)?.name ?? '未分类'}</span>
               },
               onFilter: (values: any[], record: DataItem) => values.includes(record.category),
             },
@@ -397,8 +396,10 @@ function App() {
             }
           ]} />
         </div>
-        <div style={{ flex: 2 }}>
-          <MyWebGL />
+        <div style={{ flex: 1, marginRight: 100, }}>
+          <CategoryManager handleCategory={(map: Map<string, any>) => {
+            setCate(new Map(map))
+          }} category={category} />
         </div>
       </div>
 

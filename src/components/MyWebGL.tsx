@@ -172,19 +172,19 @@ function MyWebGL() {
         // 用上面指定的颜色清除缓冲区
         gl.clear(gl.COLOR_BUFFER_BIT);
         const vsSource = `
-    attribute vec4 aVertexPosition;
-    uniform mat4 uModelViewMatrix;
-    uniform mat4 uProjectionMatrix;
-    void main() {
-      gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
-    }
-    
-  `;
+            attribute vec4 aVertexPosition;
+            uniform mat4 uModelViewMatrix;
+            uniform mat4 uProjectionMatrix;
+            void main() {
+            gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+            }
+            
+        `;
         const fsSource = `
-  void main() {
-    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-  }
-`;
+        void main() {
+            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+        }
+        `;
 
         const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
 
