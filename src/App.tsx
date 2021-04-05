@@ -1,7 +1,6 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { createContext, useEffect, useMemo, useState } from 'react';
 import { parse } from 'papaparse'
-
 import './App.css';
 import { fileExt, formatDate } from './tool';
 import Table from './components/Table';
@@ -10,9 +9,13 @@ import Modal from './components/Modal';
 import CategoryManager from './components/CategoryManager';
 import { PlusOutlined } from '@ant-design/icons';
 
+
+export const CateContext = createContext({})
+
 interface DataItem {
+  id: number,
   time: Date,
-  type: 0 | 1,
+  type: number,
   category: string,
   amout: number, // float
 }
@@ -25,15 +28,15 @@ interface CategoryItem {
 
 function App() {
 
-  const [data, setData] = useState<DataItem[]>([])
+  const [bill, setBill] = useState<DataItem[]>([])
 
-  const [dataSource, setDataSource] = useState<any[]>([])
+  const [dataSource, setDataSource] = useState<DataItem[]>([])
 
-  const [cateFilters, setFilters] = useState<any>([])
+  const [cateMap, setCateMap] = useState<Map<string, CategoryItem>>(new Map())
 
-  const [category, setCate] = useState<Map<string, CategoryItem>>(new Map())
+  const cateFilters = useMemo(() => Array.from(cateMap).map(v => v[1]).map(v => { return { title: v.name, value: v.id } }), [cateMap])
 
-  const [modalV, setModalV] = useState(false)
+  const [visible, setVisible] = useState(false)
 
   const [newItem, setNewItem] = useState({
     ope: 'add',
@@ -45,14 +48,12 @@ function App() {
   })
 
   function autoLoad() {
-    setData(processData(bills))
+    setBill(processData(bills))
     const map = processCategory(categories).reduce((p: Map<string, CategoryItem>, v: CategoryItem) => {
       p.set(v.id, v)
       return p;
     }, new Map())
-    setCate(map)
-
-
+    setCateMap(map)
   }
 
   function processData(data: any[]): DataItem[] {
@@ -132,7 +133,7 @@ function App() {
         return
       }
       console.log(res.data)
-      setData(processData(res.data))
+      setBill(processData(res.data))
     }
 
   }
@@ -171,7 +172,7 @@ function App() {
         return p;
       }, new Map())
 
-      setCate(map)
+      setCateMap(map)
 
     }
 
@@ -191,31 +192,37 @@ function App() {
     if (newItem.ope === 'add') {
       newItem.id = dataSource.length + 1;
 
-      setDataSource([...dataSource, newItem])
+      setDataSource([...dataSource, {
+        id: dataSource.length + 1,
+        amout: newItem.amount,
+        category: newItem.category,
+        time: newItem.time,
+        type: newItem.type
+      }])
     } else {
       for (let i = 0; i < dataSource.length; i++) {
         if (dataSource[i].id === newItem.id) {
-          dataSource[i] = newItem
+          dataSource[i] = {
+            id: dataSource.length + 1,
+            amout: newItem.amount,
+            category: newItem.category,
+            time: newItem.time,
+            type: newItem.type
+          }
         }
       }
       setDataSource([...dataSource])
     }
 
-    setModalV(false)
-
-
+    setVisible(false)
   }
 
 
   useEffect(() => {
-    if (data.length > 0 && category.size > 0) {
-      setDataSource(data)
+    if (bill.length > 0 && cateMap.size > 0) {
+      setDataSource(bill)
     }
-  }, [data, category])
-
-  useEffect(() => {
-    setFilters(Array.from(category).map(v => v[1]).map(v => { return { title: v.name, value: v.id } }))
-  }, [category])
+  }, [bill, cateMap])
 
 
   return (
@@ -232,7 +239,6 @@ function App() {
         </div>
         <div style={{ flex: 1 }}>
           <button onClick={autoLoad}>一键加载数据</button>
-
           <button style={{ marginLeft: 6 }} onClick={() => {
             setNewItem({
               id: 0,
@@ -242,11 +248,11 @@ function App() {
               amount: 0,
               ope: 'add'
             })
-            setModalV(true)
+            setVisible(true)
           }}>新增账单 <PlusOutlined /></button>
         </div>
       </div>
-      <Modal width={500} title={newItem.ope === 'add' ? "新增账单" : "修改账单"} visible={modalV}>
+      <Modal width={500} title={newItem.ope === 'add' ? "新增账单" : "修改账单"} visible={visible}>
         <div>
           <div style={{ display: 'flex', marginTop: 20 }}>
             <div style={{ flex: 1 }} >
@@ -272,7 +278,7 @@ function App() {
               <select value={newItem.category} onChange={(e) => {
                 setNewItem({
                   ...newItem,
-                  type: category.get(e.target.value)?.type || 0,
+                  type: cateMap.get(e.target.value)?.type || 0,
                   category: e.target.value
                 })
               }} id="category" name="category" placeholder="请选择账单类型">
@@ -308,7 +314,7 @@ function App() {
         </div>
         <div style={{ position: 'absolute', bottom: 0, right: 0 }}>
           <button onClick={() => {
-            setModalV(false)
+            setVisible(false)
           }}>取消</button>
           <button style={{ margin: 10 }} onClick={addNewItem}>确认</button>
         </div>
@@ -324,82 +330,83 @@ function App() {
           overflowY: 'scroll',
           flex: 2
         }}>
-          <Table dataSource={dataSource} columns={[
-            {
-              dataKey: 'time',
-              key: 'time',
-              title: '账单时间',
-              sorter: (a: any, b: any) => a.time.getTime() - b.time.getTime(),
-              onFilter: (values: any[], record: DataItem) => values.includes(record.time.getMonth()),
-              filters: [
-                { value: 0, title: '一月' },
-                { value: 1, title: '二月' },
-                { value: 2, title: '三月' },
-                { value: 3, title: '四月' },
-                { value: 4, title: '五月' },
-                { value: 5, title: '六月' },
-                { value: 6, title: '七月' },
-                { value: 7, title: '八月' },
-                { value: 8, title: '九月' },
-                { value: 9, title: '十月' },
-                { value: 10, title: '十一月' },
-                { value: 11, title: '十二月' },
-              ],
-              render: (v: Date) => {
-                return (<span>{v.toLocaleDateString()}</span>)
-              }
-            },
-            {
-              dataKey: 'type',
-              key: 'type',
-              title: '账单类型',
-              onFilter: (values: any[], record: DataItem) => values.includes(record.type),
-              filters: [{ value: 0, title: '支出' }, { value: 1, title: '收入' }],
-              render: (v: any) => {
-                return v === 0 ? (<span>支出</span>) : (<span>收入</span>)
-              }
-            },
-            {
-              dataKey: 'category',
-              filters: cateFilters,
-              key: 'category',
-              title: '账单分类',
-              render: (v: any) => {
-                return <span>{category?.get(v)?.name ?? '未分类'}</span>
+          <Table
+            cateMap={cateMap}
+            dataSource={dataSource}
+            columns={[
+              {
+                dataKey: 'time',
+                key: 'time',
+                title: '账单时间',
+                sorter: (a: any, b: any) => a.time.getTime() - b.time.getTime(),
+                onFilter: (values: any[], record: DataItem) => values.includes(record.time.getMonth()),
+                filters: [
+                  { value: 0, title: '一月' },
+                  { value: 1, title: '二月' },
+                  { value: 2, title: '三月' },
+                  { value: 3, title: '四月' },
+                  { value: 4, title: '五月' },
+                  { value: 5, title: '六月' },
+                  { value: 6, title: '七月' },
+                  { value: 7, title: '八月' },
+                  { value: 8, title: '九月' },
+                  { value: 9, title: '十月' },
+                  { value: 10, title: '十一月' },
+                  { value: 11, title: '十二月' },
+                ],
+                render: (v: Date) => {
+                  return (<span>{v.toLocaleDateString()}</span>)
+                }
               },
-              onFilter: (values: any[], record: DataItem) => values.includes(record.category),
-            },
-            {
-              dataKey: 'amount',
-              sorter: (a: any, b: any) => a.amount - b.amount,
-              key: 'amount',
-              title: '账单金额',
-            },
-            {
-              title: '操作',
-              dataKey: 'operation',
-              key: 'operation',
-              render: (v: any, record: any) => <div>
-                <button onClick={() => {
-                  setNewItem({
-                    ...record,
-                    ope: 'modify',
-                  })
-                  setModalV(true);
-
-                }} style={{ backgroundColor: 'white', border: 'none' }}>修改</button>
-
-                <button onClick={() => {
-                  setDataSource(dataSource.filter((v) => v.id !== record.id))
-                }} style={{ marginLeft: 5, backgroundColor: 'red', color: 'white', border: 'none' }}>删除</button>
-              </div>
-            }
-          ]} />
+              {
+                dataKey: 'type',
+                key: 'type',
+                title: '账单类型',
+                onFilter: (values: any[], record: DataItem) => values.includes(record.type),
+                filters: [{ value: 0, title: '支出' }, { value: 1, title: '收入' }],
+                render: (v: any) => {
+                  return v === 0 ? (<span>支出</span>) : (<span>收入</span>)
+                }
+              },
+              {
+                dataKey: 'category',
+                filters: cateFilters,
+                key: 'category',
+                title: '账单分类',
+                render: (v: any) => {
+                  return <span>{cateMap?.get(v)?.name ?? '未分类'}</span>
+                },
+                onFilter: (values: any[], record: DataItem) => values.includes(record.category),
+              },
+              {
+                dataKey: 'amount',
+                sorter: (a: any, b: any) => a.amount - b.amount,
+                key: 'amount',
+                title: '账单金额',
+              },
+              {
+                title: '操作',
+                dataKey: 'operation',
+                key: 'operation',
+                render: (v: any, record: any) => <div>
+                  <button onClick={() => {
+                    setNewItem({
+                      ...record,
+                      ope: 'modify',
+                    })
+                    setVisible(true);
+                  }}>修改</button>
+                  <button onClick={() => {
+                    setDataSource(dataSource.filter((v) => v.id !== record.id))
+                  }} style={{ marginLeft: 5, backgroundColor: 'red', color: 'white', border: 'none' }}>删除</button>
+                </div>
+              }
+            ]} />
         </div>
         <div style={{ flex: 1, marginRight: 100, }}>
           <CategoryManager handleCategory={(map: Map<string, any>) => {
-            setCate(new Map(map))
-          }} category={category} />
+            setCateMap(new Map(map))
+          }} category={cateMap} />
         </div>
       </div>
 

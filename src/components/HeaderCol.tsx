@@ -49,10 +49,9 @@ function HeaderCol(props: {
                                     props.filters.map((v: any) => <Checkbox key={v.value} title={v.title} value={v.value} />) :
                                     undefined
                             }
-
                         </CheckboxGroup>
                         <div>
-                            
+
                             <button onClick={() => { setVisible(false) }} style={{ margin: 3 }}>取消</button>
                             <button onClick={() => {
                                 setVisible(false)
