@@ -35,10 +35,10 @@ function Dropdown(props: {
             <div style={{
                 display: "block",
                 position: 'absolute',
-                width: 100,
+                // width: 100,
                 right: 0,
                 backgroundColor: 'white',
-                top: 25,
+                top: 28,
                 border: '1px solid black'
             }}>
                 {props.content}

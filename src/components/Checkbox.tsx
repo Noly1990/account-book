@@ -22,8 +22,8 @@ function Checkbox(props: CheckboxProps) {
                 width: size,
                 height: size
             }} onChange={props.onChange ? (e) => {
-                if (props.onChange) props.onChange(props.value, !props.checked)
-                setChecked(!props.checked)
+                if (props.onChange) props.onChange(props.value, e.target.checked)
+                setChecked(e.target.checked)
             } : onChange} checked={props.checked || checked} type="checkbox" id={props.title} value={props.value} />
             <label style={{
                 fontSize: size

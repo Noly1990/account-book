@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { CategoryItem } from "../App";
+import Flex from "../Layout/Flex";
 import HeaderCol, { SortType } from "./HeaderCol";
 import Modal from "./Modal";
 
@@ -45,7 +47,7 @@ export interface ColumnItem {
 function Table(props: {
     columns: ColumnItem[],
     dataSource: object[],
-    cateMap: any
+    cateMap: Map<string, CategoryItem>
 }) {
 
     const { columns, dataSource, cateMap } = props;
@@ -106,12 +108,12 @@ function Table(props: {
                 values[v.category] += v.amount
             }
         })
-        let temp = []
+        const temp = []
         for (let key in values) {
             temp.push({
                 id: key,
-                category: cateMap.get(key).name,
-                type: cateMap.get(key).type === 0 ? '支出' : '收入',
+                category: cateMap.get(key)?.name || '未定义',
+                type: cateMap.get(key)?.type === 0 ? '支出' : '收入',
                 amount: values[key]
             })
         }
@@ -137,30 +139,30 @@ function Table(props: {
         <div>
             <Modal title="统计分析" visible={visible}>
                 <div style={{ marginBottom: 40 }}>
-                    <div style={{ display: 'flex' }}>
-                        <div style={{ flex: 1 }}>
+                    <Flex>
+                        <Flex.Item>
                             分类
-                        </div>
-                        <div style={{ flex: 1 }}>
+                        </Flex.Item>
+                        <Flex.Item>
                             收支类型
-                        </div>
-                        <div style={{ flex: 1 }}>
+                        </Flex.Item>
+                        <Flex.Item>
                             金额
-                        </div>
-                    </div>
+                        </Flex.Item>
+                    </Flex>
                     {
                         statistics.length > 0 ? statistics.filter((v) => v.type === statType).map((v) =>
-                            <div style={{ display: 'flex', marginTop: 6 }} key={v.id}>
-                                <div style={{ flex: 1 }}>
+                            <Flex style={{ marginTop: 6 }} key={v.id}>
+                                <Flex.Item>
                                     {v.category}
-                                </div>
-                                <div style={{ flex: 1 }}>
+                                </Flex.Item>
+                                <Flex.Item>
                                     {v.type}
-                                </div>
-                                <div style={{ flex: 1 }}>
+                                </Flex.Item>
+                                <Flex.Item>
                                     {v.amount}
-                                </div>
-                            </div>) : <div>无数据</div>
+                                </Flex.Item>
+                            </Flex>) : <div>无数据</div>
                     }
                 </div>
                 <div style={{ position: 'absolute', bottom: 0, right: 0, margin: 8 }}>
@@ -172,6 +174,11 @@ function Table(props: {
                     }}>确认</button>
                 </div>
             </Modal>
+            <Flex style={{ marginTop: 10, marginBottom: 10 }}>
+                <Flex.Item>当前收入：{income}</Flex.Item>
+                <Flex.Item>当前支出：{expense}</Flex.Item>
+                <Flex.Item><button onClick={clickToStatistics}>分类统计</button></Flex.Item>
+            </Flex>
             <table style={{
                 width: '100%'
             }}>
@@ -182,15 +189,11 @@ function Table(props: {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr style={{ display: 'flex', marginTop: 10, marginBottom: 10 }}>
-                        <td style={{ flex: 1 }}>当前收入：{income}</td>
-                        <td style={{ flex: 1 }}>当前支出：{expense}</td>
-                        <td style={{ flex: 1 }}><button onClick={clickToStatistics}>分类统计</button></td>
-                    </tr>
+
                     {
                         innerData.length > 0 ? innerData.map((v: any, i: number) => {
                             return (<tr key={'row' + i} style={{ display: "flex" }}>
-                                {columns.map((c: ColumnItem, ii) => <td key={'col' + i + '-' + ii} style={{ flex: 1 }}>{
+                                {columns.map((c: ColumnItem, ii) => <td style={{ flex: 1 }} key={'col' + i + '-' + ii}>{
                                     c.render ? c.render(v[c.dataKey], v) : v[c.dataKey].toString()
                                 }</td>)}
                             </tr>)

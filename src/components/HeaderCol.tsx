@@ -11,9 +11,9 @@ function HeaderCol(props: {
     handleFilter: (key: string, filter: any, values: any[]) => void
     handleSort: (key: string, sorter: any, sortType: SortType) => void
     dataKey: string,
-    children: any,
+    children: React.ReactNode,
     sorter?: (a: any, b: any) => any,
-    filter?: any,
+    filter?: (values: any[], record: any) => boolean,
     filters?: any[]
 }) {
 
@@ -35,18 +35,21 @@ function HeaderCol(props: {
                 !props.filters || <Dropdown handleVisible={() => {
                     setVisible(!visiblle)
                 }} visible={visiblle} content={
-                    <div>
+                    <div style={{
+                        width: 100,
+                        textAlign: 'left',
+                        padding: 5,
+                    }}>
                         <CheckboxGroup onChange={(v: any) => {
                             setValue(v)
                         }} value={value}>
                             {
                                 props.filters && props.filters.length > 0 ?
                                     props.filters.map((v: any) => <Checkbox key={v.value} title={v.title} value={v.value} />) :
-                                    undefined
+                                    null
                             }
                         </CheckboxGroup>
                         <div>
-
                             <button onClick={() => { setVisible(false) }} style={{ margin: 3 }}>取消</button>
                             <button onClick={() => {
                                 setVisible(false)

@@ -21,12 +21,12 @@ function Modal(props: ModalProps) {
             minHeight: 200,
             display: visible ? "block" : 'none',
             position: 'fixed',
-            top: '30%',
+            top: '35%',
             left: '50%',
             border: '1px solid #999',
             transform: 'translateX(-50%)',
             backgroundColor: 'white',
-            zIndex: 10
+            zIndex: 99
         }}>
             <div style={{
                 marginTop: 10

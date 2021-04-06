@@ -1,14 +1,15 @@
 import { PlusOutlined } from "@ant-design/icons";
 import React, { useState } from "react";
 import Flex from "../Layout/Flex";
+import Space from "../Layout/Space";
 import Modal from "./Modal";
 
 function CategoryManager(props: {
-    category: Map<string, any>,
-    handleCategory: (category: Map<string, any>) => void
+    cateMap: Map<string, any>,
+    handleCateMap: (category: Map<string, any>) => void
 }) {
 
-    const { category, handleCategory } = props
+    const { cateMap, handleCateMap } = props
 
     const [newCate, setNewCate] = useState({
         ope: 'add',
@@ -29,32 +30,28 @@ function CategoryManager(props: {
             let randomId = ''
             while (true) {
                 randomId = Math.random().toString(32).slice(2);
-                if (!category.has(randomId)) break
+                if (!cateMap.has(randomId)) break
             }
-            category.set(randomId, {
+            cateMap.set(randomId, {
                 id: randomId,
                 name: newCate.name,
                 type: newCate.type
             })
         } else {
-            category.set(newCate.id, {
+            cateMap.set(newCate.id, {
                 id: newCate.id,
                 name: newCate.name,
                 type: newCate.type
             })
         }
-
-
-        handleCategory(category)
-
+        handleCateMap(cateMap)
         setVisible(false)
     }
 
 
     function deleteCate(id: string) {
-        category.delete(id)
-
-        handleCategory(category)
+        cateMap.delete(id)
+        handleCateMap(cateMap)
     }
 
     return (
@@ -88,48 +85,48 @@ function CategoryManager(props: {
                         })
                     }} name="category" type="text" minLength={1} maxLength={10} value={newCate.name} />
                 </div>
-                <div style={{ position: 'absolute', bottom: 0, right: 0 }}>
-                    <button onClick={() => {
-                        setVisible(false)
-                    }}>取消</button>
-                    <button style={{ margin: 10 }} onClick={addNewCate}>确认</button>
+                <div style={{ position: 'absolute', bottom: 0, right: 0, margin: 6 }}>
+                    <Space>
+                        <button onClick={() => {
+                            setVisible(false)
+                        }}>取消</button>
+                        <button onClick={addNewCate}>确认</button>
+                    </Space>
                 </div>
             </Modal>
-            <div style={{ display: 'flex' }} key='title'>
-
-                <div style={{ flex: 1 }}>
+            <Flex key='title'>
+                <Flex.Item>
                     序号
-                </div>
-                <div style={{ flex: 1 }}>
+                </Flex.Item>
+                <Flex.Item>
                     ID
-                </div>
-                <div style={{ flex: 1 }}>
+                </Flex.Item>
+                <Flex.Item>
                     收支类型
-                </div>
-                <div style={{ flex: 1 }}>
+                </Flex.Item>
+                <Flex.Item>
                     分类名称
-                </div>
-                <div style={{ flex: 1 }}>
+                </Flex.Item>
+                <Flex.Item>
                     操作
-                </div>
-            </div>
+                </Flex.Item>
+            </Flex>
             {
-                Array.from(props.category).map((v, i) =>
-                    <div style={{ display: 'flex', marginTop: 8 }} key={v[0]}>
-
-                        <div style={{ flex: 1 }}>
+                Array.from(props.cateMap).map((v, i) =>
+                    <Flex style={{ marginTop: 8 }} key={v[0]}>
+                        <Flex.Item>
                             {i + 1}
-                        </div>
-                        <div style={{ flex: 1 }}>
+                        </Flex.Item>
+                        <Flex.Item>
                             {v[1].id}
-                        </div>
-                        <div style={{ flex: 1 }}>
+                        </Flex.Item>
+                        <Flex.Item>
                             {v[1].type === 0 ? '支出' : '收入'}
-                        </div>
-                        <div style={{ flex: 1 }}>
+                        </Flex.Item>
+                        <Flex.Item>
                             {v[1].name}
-                        </div>
-                        <div style={{ flex: 1 }}>
+                        </Flex.Item>
+                        <Flex.Item>
                             <button onClick={() => {
                                 setNewCate({
                                     id: v[1].id,
@@ -143,33 +140,22 @@ function CategoryManager(props: {
                             <button onClick={() => {
                                 deleteCate(v[0])
                             }} style={{ marginLeft: 5, backgroundColor: 'red', color: 'white', border: 'none' }}>删除</button>
-                        </div>
-                    </div>)
+                        </Flex.Item>
+                    </Flex>)
             }
-            <div>
 
-                <div style={{ display: 'flex', marginTop: 15 }} key='title'>
+            <Flex style={{ display: 'flex', marginTop: 15 }} key='addBtn'>
 
-                    <div style={{ flex: 1 }}>
-
-                    </div>
-                    <div style={{ flex: 1 }}>
-
-                    </div>
-                    <div style={{ flex: 1 }}>
-                        <button onClick={() => {
-                            setVisible(true)
-                        }}>新增分类 <PlusOutlined /></button>
-                    </div>
-                    <div style={{ flex: 1 }}>
-
-                    </div>
-                    <div style={{ flex: 1 }}>
-
-                    </div>
-                </div>
-
-            </div>
+                <Flex.Item></Flex.Item>
+                <Flex.Item></Flex.Item>
+                <Flex.Item>
+                    <button onClick={() => {
+                        setVisible(true)
+                    }}>新增分类 <PlusOutlined /></button>
+                </Flex.Item>
+                <Flex.Item></Flex.Item>
+                <Flex.Item></Flex.Item>
+            </Flex>
         </div>
     )
 }

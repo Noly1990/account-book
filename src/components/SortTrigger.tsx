@@ -11,7 +11,6 @@ function SortTrigger(props: {
                 <CaretDownOutlined style={{ flex: 1, color: props.status === 'down' ? '#1890ff' : 'black' }} />
             </div>
         </div>
-
     )
 }
 

@@ -9,11 +9,12 @@ import Modal from './components/Modal';
 import CategoryManager from './components/CategoryManager';
 import { PlusOutlined } from '@ant-design/icons'
 import Flex from './Layout/Flex';
+import Space from './Layout/Space';
 
 
 export const CateContext = createContext({})
 
-interface DataItem {
+export interface DataItem {
   id: number,
   time: Date,
   type: number,
@@ -21,7 +22,7 @@ interface DataItem {
   amount: number, // float
 }
 
-interface CategoryItem {
+export interface CategoryItem {
   id: string,
   name: string,
   type: 0 | 1,
@@ -135,7 +136,6 @@ function App() {
         alert('处理出错')
         return
       }
-      console.log(res.data)
       setBill(processData(res.data))
     }
 
@@ -300,6 +300,9 @@ function App() {
 
   return (
     <div className="App">
+      <div>
+        <h2>简易记账本</h2>
+      </div>
       <Flex style={{
         marginTop: 50
       }}>
@@ -337,7 +340,6 @@ function App() {
               }} checked={newItem.type === 0} />
               <label htmlFor="0">支出</label>
               <input disabled type="radio" id="1" name="type" value={1} onChange={(e) => {
-                console.log(e.target.value)
                 setNewItem({
                   ...newItem,
                   type: parseInt(e.target.value)
@@ -384,21 +386,23 @@ function App() {
             </Flex.Item>
           </Flex>
         </div>
-        <div style={{ position: 'absolute', bottom: 0, right: 0 }}>
-          <button onClick={() => {
-            setVisible(false)
-          }}>取消</button>
-          <button style={{ margin: 10 }} onClick={addNewItem}>确认</button>
+        <div style={{ position: 'absolute', bottom: 0, right: 0, margin: 6 }}>
+          <Space>
+            <button onClick={() => {
+              setVisible(false)
+            }}>取消</button>
+            <button onClick={addNewItem}>确认</button>
+          </Space>
         </div>
       </Modal>
 
       <Flex>
-        <Flex.Item style={{
+        <Flex.Item occupy={2} style={{
           marginTop: 10,
           marginLeft: 100,
           marginBottom: 50,
           marginRight: 30,
-          height: '80vh',
+          height: '75vh',
           overflowY: 'scroll',
         }}>
           <Table
@@ -406,10 +410,10 @@ function App() {
             dataSource={dataSource}
             columns={columns} />
         </Flex.Item>
-        <Flex.Item style={{ flex: 1, marginRight: 100, }}>
-          <CategoryManager handleCategory={(map: Map<string, any>) => {
+        <Flex.Item occupy={1} style={{ marginRight: 100, }}>
+          <CategoryManager handleCateMap={(map: Map<string, any>) => {
             setCateMap(new Map(map))
-          }} category={cateMap} />
+          }} cateMap={cateMap} />
         </Flex.Item>
       </Flex>
     </div>
