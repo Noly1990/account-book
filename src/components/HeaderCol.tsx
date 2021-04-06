@@ -22,19 +22,14 @@ function HeaderCol(props: {
     const [value, setValue] = useState([])
     return (
         <th style={{ flex: 1, cursor: 'pointer', userSelect: 'none' }}>
-            { !props.sorter || <SortTrigger onClick={() => {
-                const newStatus = status === 'none' ? 'up' : status === 'up' ? 'down' : 'none'
-                setStatus(newStatus)
-                props.handleSort(props.dataKey, props.sorter, newStatus)
-            }} status={status} />}
-
             <span onClick={() => {
                 if (!props.sorter) return
                 const newStatus = status === 'none' ? 'up' : status === 'up' ? 'down' : 'none'
                 setStatus(newStatus)
                 props.handleSort(props.dataKey, props.sorter, newStatus)
             }} style={{ marginLeft: 6, position: 'relative', top: 5 }}>
-                {props.children}
+                {!props.sorter || <SortTrigger status={status} />}
+                <span>{props.children}</span>
             </span>
             {
                 !props.filters || <Dropdown handleVisible={() => {

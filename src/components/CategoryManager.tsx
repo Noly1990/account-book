@@ -1,5 +1,6 @@
 import { PlusOutlined } from "@ant-design/icons";
 import React, { useState } from "react";
+import Flex from "../Layout/Flex";
 import Modal from "./Modal";
 
 function CategoryManager(props: {
@@ -7,7 +8,7 @@ function CategoryManager(props: {
     handleCategory: (category: Map<string, any>) => void
 }) {
 
-    const {category ,handleCategory} = props
+    const { category, handleCategory } = props
 
     const [newCate, setNewCate] = useState({
         ope: 'add',
@@ -26,8 +27,8 @@ function CategoryManager(props: {
 
         if (newCate.ope === 'add') {
             let randomId = ''
-            while(true) {
-                 randomId = Math.random().toString(32).slice(2);
+            while (true) {
+                randomId = Math.random().toString(32).slice(2);
                 if (!category.has(randomId)) break
             }
             category.set(randomId, {
@@ -59,8 +60,8 @@ function CategoryManager(props: {
     return (
         <div style={{ marginTop: 20 }}>
             <Modal title={newCate.ope === 'add' ? "新增分类" : "修改分类"} width={400} visible={visible}>
-                <div style={{ display: 'flex', marginTop: 20 }}>
-                    <div style={{ flex: 1 }} >
+                <Flex style={{ marginTop: 20 }}>
+                    <Flex.Item >
                         <label htmlFor="ctype">收支类型：</label>
                         <input type="radio" id="0" name="ctype" value={0} onChange={(e) => {
                             setNewCate({
@@ -76,8 +77,8 @@ function CategoryManager(props: {
                             })
                         }} checked={newCate.type === 1} />
                         <label htmlFor="1">收入</label>
-                    </div>
-                </div>
+                    </Flex.Item>
+                </Flex>
                 <div style={{ marginTop: 20 }}>
                     <label htmlFor="category">分类名称：</label>
                     <input onChange={(e) => {

@@ -32,7 +32,7 @@ export interface ColumnItem {
     /**
      * 表头的筛选组
      */
-    filters?: object[],
+    filters?: { value: any, title: string }[],
 
     /**
      * 筛选是否支持多选

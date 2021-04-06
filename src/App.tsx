@@ -7,7 +7,8 @@ import Table from './components/Table';
 import { bills, categories } from './csv/data';
 import Modal from './components/Modal';
 import CategoryManager from './components/CategoryManager';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons'
+import Flex from './Layout/Flex';
 
 
 export const CateContext = createContext({})
@@ -17,7 +18,7 @@ interface DataItem {
   time: Date,
   type: number,
   category: string,
-  amout: number, // float
+  amount: number, // float
 }
 
 interface CategoryItem {
@@ -46,6 +47,8 @@ function App() {
     amount: 0,
     id: 0
   })
+
+
 
   function autoLoad() {
     setBill(processData(bills))
@@ -194,7 +197,7 @@ function App() {
 
       setDataSource([...dataSource, {
         id: dataSource.length + 1,
-        amout: newItem.amount,
+        amount: newItem.amount,
         category: newItem.category,
         time: newItem.time,
         type: newItem.type
@@ -204,7 +207,7 @@ function App() {
         if (dataSource[i].id === newItem.id) {
           dataSource[i] = {
             id: dataSource.length + 1,
-            amout: newItem.amount,
+            amount: newItem.amount,
             category: newItem.category,
             time: newItem.time,
             type: newItem.type
@@ -224,20 +227,89 @@ function App() {
     }
   }, [bill, cateMap])
 
+  const columns = [
+    {
+      dataKey: 'time',
+      key: 'time',
+      title: '账单时间',
+      sorter: (a: any, b: any) => a.time.getTime() - b.time.getTime(),
+      onFilter: (values: any[], record: DataItem) => values.includes(record.time.getMonth()),
+      filters: [
+        { value: 0, title: '一月' },
+        { value: 1, title: '二月' },
+        { value: 2, title: '三月' },
+        { value: 3, title: '四月' },
+        { value: 4, title: '五月' },
+        { value: 5, title: '六月' },
+        { value: 6, title: '七月' },
+        { value: 7, title: '八月' },
+        { value: 8, title: '九月' },
+        { value: 9, title: '十月' },
+        { value: 10, title: '十一月' },
+        { value: 11, title: '十二月' },
+      ],
+      render: (v: Date) => {
+        return (<span>{v.toLocaleDateString()}</span>)
+      }
+    },
+    {
+      dataKey: 'type',
+      key: 'type',
+      title: '账单类型',
+      onFilter: (values: any[], record: DataItem) => values.includes(record.type),
+      filters: [{ value: 0, title: '支出' }, { value: 1, title: '收入' }],
+      render: (v: any) => {
+        return v === 0 ? (<span>支出</span>) : (<span>收入</span>)
+      }
+    },
+    {
+      dataKey: 'category',
+      filters: cateFilters,
+      key: 'category',
+      title: '账单分类',
+      render: (v: any) => {
+        return <span>{cateMap?.get(v)?.name ?? '未分类'}</span>
+      },
+      onFilter: (values: any[], record: DataItem) => values.includes(record.category),
+    },
+    {
+      dataKey: 'amount',
+      sorter: (a: any, b: any) => a.amount - b.amount,
+      key: 'amount',
+      title: '账单金额',
+    },
+    {
+      title: '操作',
+      dataKey: 'operation',
+      key: 'operation',
+      render: (v: any, record: any) => <div>
+        <button onClick={() => {
+          setNewItem({
+            ...record,
+            ope: 'modify',
+          })
+          setVisible(true);
+        }}>修改</button>
+        <button onClick={() => {
+          setDataSource(dataSource.filter((v) => v.id !== record.id))
+        }} style={{ marginLeft: 5, backgroundColor: 'red', color: 'white', border: 'none' }}>删除</button>
+      </div>
+    }
+  ]
+
 
   return (
     <div className="App">
-      <div style={{
-        marginTop: 50,
-        display: 'flex',
+      <Flex style={{
+        marginTop: 50
       }}>
-        <div style={{ flex: 1 }}>
+        <Flex.Item>
           请选择账单文件：<input onClick={(e: any) => { e.target.value = null }} onChange={onDataChange} type="file" placeholder="请选择账单数据" accept=".csv" />
-        </div>
-        <div style={{ flex: 1 }}>
+        </Flex.Item>
+        <Flex.Item>
           请选择分类文件： <input onChange={onCategoryChange} type="file" onClick={(e: any) => { e.target.value = null }} placeholder="请选择分类数据" accept=".csv" />
-        </div>
-        <div style={{ flex: 1 }}>
+        </Flex.Item>
+        <Flex.Item>
           <button onClick={autoLoad}>一键加载数据</button>
           <button style={{ marginLeft: 6 }} onClick={() => {
             setNewItem({
@@ -250,12 +322,12 @@ function App() {
             })
             setVisible(true)
           }}>新增账单 <PlusOutlined /></button>
-        </div>
-      </div>
+        </Flex.Item>
+      </Flex>
       <Modal width={500} title={newItem.ope === 'add' ? "新增账单" : "修改账单"} visible={visible}>
         <div>
-          <div style={{ display: 'flex', marginTop: 20 }}>
-            <div style={{ flex: 1 }} >
+          <Flex style={{ marginTop: 20 }}>
+            <Flex.Item>
               <label htmlFor="type">账单类型：</label>
               <input disabled type="radio" id="0" name="type" value={0} onChange={(e) => {
                 setNewItem({
@@ -272,8 +344,8 @@ function App() {
                 })
               }} checked={newItem.type === 1} />
               <label htmlFor="1">收入</label>
-            </div>
-            <div style={{ flex: 1 }}>
+            </Flex.Item>
+            <Flex.Item>
               <label htmlFor="category">账单分类：</label>
               <select value={newItem.category} onChange={(e) => {
                 setNewItem({
@@ -287,10 +359,10 @@ function App() {
                   cateFilters.map((v: any) => <option key={v.value} value={v.value}>{v.title}</option>)
                 }
               </select>
-            </div>
-          </div>
-          <div style={{ display: 'flex', marginTop: 20 }}>
-            <div style={{ flex: 1 }}>
+            </Flex.Item>
+          </Flex>
+          <Flex style={{ marginTop: 20 }}>
+            <Flex.Item>
               <label htmlFor="time">账单日期：</label>
               <input id="time" style={{ width: 140 }} value={formatDate(newItem.time)} onChange={(e) => {
                 const d = new Date(e.target.value)
@@ -300,8 +372,8 @@ function App() {
                   time: d
                 })
               }} type="date" />
-            </div>
-            <div style={{ flex: 1 }}>
+            </Flex.Item>
+            <Flex.Item>
               <label htmlFor="amount">账单金额：</label>
               <input style={{ width: 140 }} onChange={(e) => {
                 setNewItem({
@@ -309,8 +381,8 @@ function App() {
                   amount: parseFloat(e.target.value),
                 })
               }} value={newItem.amount} id="amount" type="number" />
-            </div>
-          </div>
+            </Flex.Item>
+          </Flex>
         </div>
         <div style={{ position: 'absolute', bottom: 0, right: 0 }}>
           <button onClick={() => {
@@ -320,100 +392,26 @@ function App() {
         </div>
       </Modal>
 
-      <div style={{ display: 'flex' }}>
-        <div style={{
+      <Flex>
+        <Flex.Item style={{
           marginTop: 10,
           marginLeft: 100,
           marginBottom: 50,
           marginRight: 30,
           height: '80vh',
           overflowY: 'scroll',
-          flex: 2
         }}>
           <Table
             cateMap={cateMap}
             dataSource={dataSource}
-            columns={[
-              {
-                dataKey: 'time',
-                key: 'time',
-                title: '账单时间',
-                sorter: (a: any, b: any) => a.time.getTime() - b.time.getTime(),
-                onFilter: (values: any[], record: DataItem) => values.includes(record.time.getMonth()),
-                filters: [
-                  { value: 0, title: '一月' },
-                  { value: 1, title: '二月' },
-                  { value: 2, title: '三月' },
-                  { value: 3, title: '四月' },
-                  { value: 4, title: '五月' },
-                  { value: 5, title: '六月' },
-                  { value: 6, title: '七月' },
-                  { value: 7, title: '八月' },
-                  { value: 8, title: '九月' },
-                  { value: 9, title: '十月' },
-                  { value: 10, title: '十一月' },
-                  { value: 11, title: '十二月' },
-                ],
-                render: (v: Date) => {
-                  return (<span>{v.toLocaleDateString()}</span>)
-                }
-              },
-              {
-                dataKey: 'type',
-                key: 'type',
-                title: '账单类型',
-                onFilter: (values: any[], record: DataItem) => values.includes(record.type),
-                filters: [{ value: 0, title: '支出' }, { value: 1, title: '收入' }],
-                render: (v: any) => {
-                  return v === 0 ? (<span>支出</span>) : (<span>收入</span>)
-                }
-              },
-              {
-                dataKey: 'category',
-                filters: cateFilters,
-                key: 'category',
-                title: '账单分类',
-                render: (v: any) => {
-                  return <span>{cateMap?.get(v)?.name ?? '未分类'}</span>
-                },
-                onFilter: (values: any[], record: DataItem) => values.includes(record.category),
-              },
-              {
-                dataKey: 'amount',
-                sorter: (a: any, b: any) => a.amount - b.amount,
-                key: 'amount',
-                title: '账单金额',
-              },
-              {
-                title: '操作',
-                dataKey: 'operation',
-                key: 'operation',
-                render: (v: any, record: any) => <div>
-                  <button onClick={() => {
-                    setNewItem({
-                      ...record,
-                      ope: 'modify',
-                    })
-                    setVisible(true);
-                  }}>修改</button>
-                  <button onClick={() => {
-                    setDataSource(dataSource.filter((v) => v.id !== record.id))
-                  }} style={{ marginLeft: 5, backgroundColor: 'red', color: 'white', border: 'none' }}>删除</button>
-                </div>
-              }
-            ]} />
-        </div>
-        <div style={{ flex: 1, marginRight: 100, }}>
+            columns={columns} />
+        </Flex.Item>
+        <Flex.Item style={{ flex: 1, marginRight: 100, }}>
           <CategoryManager handleCategory={(map: Map<string, any>) => {
             setCateMap(new Map(map))
           }} category={cateMap} />
-        </div>
-      </div>
-
-
-
-
-
+        </Flex.Item>
+      </Flex>
     </div>
   );
 }

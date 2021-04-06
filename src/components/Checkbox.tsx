@@ -10,9 +10,8 @@ export interface CheckboxProps {
 }
 
 function Checkbox(props: CheckboxProps) {
-    const [checked, setChecked] = useState(props.checked || false)
-    const { size = 16 } = props
-
+    const [checked, setChecked] = useState(props.checked || false);
+    const { size = 16 } = props;
 
     function onChange(e: any) {
         setChecked(!checked)
