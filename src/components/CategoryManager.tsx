@@ -99,9 +99,6 @@ function CategoryManager(props: {
                     序号
                 </Flex.Item>
                 <Flex.Item>
-                    ID
-                </Flex.Item>
-                <Flex.Item>
                     收支类型
                 </Flex.Item>
                 <Flex.Item>
@@ -116,9 +113,6 @@ function CategoryManager(props: {
                     <Flex style={{ marginTop: 8 }} key={v[0]}>
                         <Flex.Item>
                             {i + 1}
-                        </Flex.Item>
-                        <Flex.Item>
-                            {v[1].id}
                         </Flex.Item>
                         <Flex.Item>
                             {v[1].type === 0 ? '支出' : '收入'}
@@ -145,15 +139,12 @@ function CategoryManager(props: {
             }
 
             <Flex style={{ display: 'flex', marginTop: 15 }} key='addBtn'>
-
-                <Flex.Item></Flex.Item>
                 <Flex.Item></Flex.Item>
                 <Flex.Item>
                     <button onClick={() => {
                         setVisible(true)
                     }}>新增分类 <PlusOutlined /></button>
                 </Flex.Item>
-                <Flex.Item></Flex.Item>
                 <Flex.Item></Flex.Item>
             </Flex>
         </div>
